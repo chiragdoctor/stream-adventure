@@ -1,17 +1,15 @@
-var http = require('http'),
-    through = require('through');
+var http = require('http');
+var through = require('through');
 
-function transform(buf) {
-    this.queue(buf.toString().toUpperCase());
-}
+var server = http.createServer(function (req, res){
+	if(req.method == "POST"){
+		req.pipe(through( function (data) {
+			this.queue(data.toString().toUpperCase());
+		})).pipe(res);
+	}
+	else {
+		res.end('Not a post response');
+	}
+});
 
-function handler(req, res) {
-    if(req.method !== 'POST') {
-        res.end('POST me something');
-        return;
-    }
-
-    req.pipe(through(transform)).pipe(res);
-}
-
-http.createServer(handler).listen(3000);
+server.listen(process.argv[2])
